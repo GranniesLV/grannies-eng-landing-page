@@ -221,7 +221,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   setActiveNavLink();
   initializeDropdowns();
-  initFormValidation();
 
   // Pēc lapas ielādes, ja URL ir #id, ritinām līdz attiecīgajai sadaļai
   if (window.location.hash) {
