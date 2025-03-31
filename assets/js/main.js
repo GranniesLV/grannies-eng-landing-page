@@ -1,79 +1,22 @@
 import {scrollToTop, toggleScrollButton} from "./additionalFunc.js";
 
-// Funkcija, lai ielādētu komponentus (header un footer) un organizētu chat-pop-up ..
+// Funkcija komponentu ielādei
 async function loadComponent(id, file) {
   try {
     const response = await fetch(`/components/${file}`);
     if (!response.ok) throw new Error(`Neizdevās ielādēt: ${file}`);
     document.getElementById(id).innerHTML = await response.text();
 
-    // Ja ielādētais fails ir footer.html, tad izsauc SVG apstrādi
     if (id === "footer") {
-      console.log("Footer ielādēts!");
       handleSvgIcons();
+    }
 
-      // Pop-up funkcionalitāte
-      const chatPopUp = document.getElementById("chat-pop-up");
-      const icon1 = document.getElementById("icon1");
-
-      // Funkcija, lai aizvērtu pop-up
-      const closePopUp = () => {
-        chatPopUp.classList.remove("active");
-        chatPopUp.classList.add("hidden");
-      };
-
-      // Funkcija, lai atvērtu pop-up
-      const openPopUp = () => {
-        chatPopUp.classList.remove("hidden");
-        chatPopUp.classList.add("active");
-      };
-
-      // Pievienojam klikšķa notikumu ikonas klikšķim (ja tiek nospiesta #icon1)
-      icon1.addEventListener("click", (event) => {
-        if (!chatPopUp.classList.contains("active")) {
-          openPopUp();
-        } else {
-          closePopUp();
-        }
-        event.stopPropagation(); // Novēršam klikšķa pārnešanu uz dokumentu
-      });
-
-      chatPopUp.addEventListener("click", (event) => {
-        if (!chatPopUp.classList.contains("active")) {
-          openPopUp();
-        } else {
-          closePopUp();
-        }
-        event.stopPropagation(); // Novēršam klikšķa pārnešanu uz dokumentu
-      });
-
-      // Pievienojam klikšķa notikumu ārpus pop-up, lai aizvērtu to, ja klikšķis ir ārpus tā
-      document.addEventListener("click", (event) => {
-        if (!chatPopUp.contains(event.target)) {
-          closePopUp();
-        }
-      });
+    if (id === "contact-pop-up") {
+      setupContactPopUp();
     }
   } catch (error) {
     console.error(error);
   }
-}
-
-
-
-// Funkcija, kas apstrādā SVG pēc ielādes
-function handleSvgIcons() {
-  const svgs = document.querySelectorAll(".icon svg");
-  const a = document.querySelectorAll(".additional-icons a");
-  console.log("Atrasto SVG skaits:", svgs.length);
-  console.log("Atrasto A tag skaits:", a.length);
-  
-
-  svgs.forEach((svg) => {
-    svg.addEventListener("click", () => {
-      console.log("Klikšķis uz:", svg.classList);
-    });
-  });
 }
 
 // Funkcija dropdown loģikas inicializācijai
@@ -84,27 +27,22 @@ function initializeDropdowns() {
       let menu = dropdown.querySelector(".dropdown-menu");
       let toggle = dropdown.querySelector(".dropdown-toggle");
 
-      // Hover uz dropdown pogas, lai atvērtu izvēlni
       dropdown.addEventListener("mouseenter", function () {
         closeAllDropdowns();
         menu.classList.add("show");
         toggle.setAttribute("aria-expanded", "true");
       });
 
-      // Hover no dropdown pogas, lai aizvērtu izvēlni
       dropdown.addEventListener("mouseleave", function () {
         menu.classList.remove("show");
         toggle.setAttribute("aria-expanded", "false");
       });
 
-      // Klikšķis uz dropdown nosaukuma, lai pārietu uz attiecīgo saiti
       toggle.addEventListener("click", function (event) {
         event.preventDefault();
-
         let link = toggle.getAttribute("href");
         if (link) {
           if (link.startsWith("#")) {
-            // Ja saite ir ID (iekšējā navigācija), ritinām līdz sadaļai
             const target = document.querySelector(link);
             if (target) {
               setTimeout(() => {
@@ -112,7 +50,6 @@ function initializeDropdowns() {
               }, 500);
             }
           } else {
-            // Ja ir ārējā saite, pārejam uz to
             window.location.href = link;
           }
         } else {
@@ -125,23 +62,17 @@ function initializeDropdowns() {
         }
       });
 
-      // Pārbaude, vai ir pieejami dropdown-item elementi
       let dropdownItems = dropdown.querySelectorAll(".dropdown-item");
-
       dropdownItems.forEach(function (item) {
         item.addEventListener("click", function () {
-          // Noņem 'active' klasi no visiem citiem itemiem
           dropdownItems.forEach(function (i) {
             i.classList.remove("active");
           });
-
-          // Pievieno 'active' klasi noklikšķinātajam item
           item.classList.add("active");
         });
       });
     });
 
-    // Aizvērt visas dropdown izvēlnes
     function closeAllDropdowns() {
       dropdowns.forEach(function (d) {
         let m = d.querySelector(".dropdown-menu");
@@ -153,14 +84,13 @@ function initializeDropdowns() {
   }
 }
 
-// Funkcija, lai pārvaldītu aktīvo navigācijas saiti (iekļaujot footer sadaļu)
+// Funkcija aktīvās navigācijas saites noteikšanai
 function setActiveNavLink() {
   const navLinks = document.querySelectorAll(
     ".nav-link, .dropdown-item, footer a"
   );
   const currentPath = window.location.pathname + window.location.hash;
 
-  // Ja atrodamies sākumlapā tad active klase netiek pievienota nekam
   if (
     window.location.pathname === "/" ||
     window.location.pathname === "index.html"
@@ -177,11 +107,9 @@ function setActiveNavLink() {
       const linkURL = new URL(link.href, window.location.origin);
       const linkPath = linkURL.pathname + linkURL.hash;
 
-      // Pārbaudām, vai saites ceļš sakrīt ar pašreizējo ceļu
       if (linkPath === currentPath) {
         link.classList.add("active");
 
-        // Ja aktīvais links ir dropdown-item, pievieno 'active' arī dropdown-toggle
         const parentDropdown = link.closest(".dropdown");
         if (parentDropdown) {
           const dropdownToggle =
@@ -191,7 +119,6 @@ function setActiveNavLink() {
           }
         }
 
-        // Papildus - Atrodam visus linkus ar šo pašu href un pievienojam tiem 'active' klasi
         document
           .querySelectorAll(`a[href='${link.href}']`)
           .forEach((matchingLink) => {
@@ -206,14 +133,13 @@ function setActiveNavLink() {
   });
 }
 
-
-// Izsaucam sākotnēji, kad lapa ielādējas
+// Dokumenta ielādes funkcionalitāte
 document.addEventListener("DOMContentLoaded", async function () {
-  // Ielādējam header, footer komponentes
   await loadComponent("header", "header.html");
   await loadComponent("footer", "footer.html");
+  await loadComponent("contact-pop-up", "contact-pop-up.html");
+  await loadComponent("scroll-to-top", "scroll-to-top.html");
 
-  // Pievienojam scroll-to-top funkcionalitāti banerim
   const banner = document.getElementById("scroll-to-top");
   if (banner) {
     banner.addEventListener("click", scrollToTop);
@@ -222,7 +148,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   setActiveNavLink();
   initializeDropdowns();
 
-  // Pēc lapas ielādes, ja URL ir #id, ritinām līdz attiecīgajai sadaļai
   if (window.location.hash) {
     const target = document.querySelector(window.location.hash);
     if (target) {
@@ -241,3 +166,100 @@ window.onload = function () {
 };
 
 window.addEventListener("scroll", toggleScrollButton);
+
+// Funkcija kontaktu pop-up loga inicializācijai
+function setupContactPopUp() {
+  const contactPopUp = document.getElementById("contact-pop-up");
+  const chatHeartIcon = document.getElementById("chat-heart-fill");
+  const closeBtn = document.getElementById("close-btn");
+
+  if (!contactPopUp || !chatHeartIcon || !closeBtn) return;
+
+  const closePopUp = () => {
+    contactPopUp.classList.remove("active");
+    contactPopUp.classList.add("hidden");
+    sessionStorage.setItem("contactClosed", "true");
+  };
+
+  const openPopUp = () => {
+    contactPopUp.classList.remove("hidden");
+    contactPopUp.classList.add("active");
+    sessionStorage.setItem("contactClosed", "false");
+  };
+
+  const contactClosed = sessionStorage.getItem("contactClosed") === "true";
+
+  if (
+    window.location.pathname === "/" ||
+    window.location.pathname === "/index.html"
+  ) {
+    openPopUp();
+  } else if (!contactClosed) {
+    openPopUp();
+  }
+
+  chatHeartIcon.addEventListener("click", (event) => {
+    if (!contactPopUp.classList.contains("active")) {
+      openPopUp();
+    } else {
+      closePopUp();
+    }
+    event.stopPropagation();
+  });
+
+  closeBtn.addEventListener("click", (event) => {
+    closePopUp();
+    event.stopPropagation();
+  });
+
+  contactPopUp.addEventListener("click", (event) => {
+    if (!contactPopUp.classList.contains("active")) {
+      openPopUp();
+    } else {
+      closePopUp();
+    }
+    event.stopPropagation();
+  });
+}
+
+// Funkcija SVG ikonu apstrādei pēc ielādes
+function handleSvgIcons() {
+  const svgs = document.querySelectorAll(".icon svg");
+  const a = document.querySelectorAll(".additional-icons a");
+
+  svgs.forEach((svg) => {
+    svg.addEventListener("click", () => {
+      console.log("Klikšķis uz:", svg.classList);
+    });
+  });
+}
+
+// Lasīt vairāk... pogas loģika
+document.addEventListener("DOMContentLoaded", function () {
+  let readMoreText = document.getElementById("readMoreText");
+
+  if (readMoreText) {
+    readMoreText.addEventListener("click", function () {
+      let moreText = document.getElementById("more");
+
+      if (moreText.style.display === "none") {
+        moreText.style.display = "inline";
+        readMoreText.textContent = "Lasīt mazāk";
+      } else {
+        moreText.style.display = "none";
+        readMoreText.textContent = "Lasīt vairāk...";
+      }
+    });
+  }
+});
+
+// Modālā loga atvēršana pēc lapas ielādes
+window.onload = function () {
+  if (
+    window.location.pathname === "/" ||
+    window.location.pathname === "/index.html"
+  ) {
+    var myModal = new bootstrap.Modal(document.getElementById("facebookModal"));
+    myModal.show();
+  }
+};
