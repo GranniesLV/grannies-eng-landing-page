@@ -234,23 +234,19 @@ function handleSvgIcons() {
   });
 }
 
-// Lasīt vairāk... pogas loģika
-document.addEventListener("DOMContentLoaded", function () {
-  let readMoreText = document.getElementById("readMoreText");
-
-  if (readMoreText) {
-    readMoreText.addEventListener("click", function () {
-      let moreText = document.getElementById("more");
-
-      if (moreText.style.display === "none") {
-        moreText.style.display = "inline";
-        readMoreText.textContent = "Lasīt mazāk";
-      } else {
-        moreText.style.display = "none";
-        readMoreText.textContent = "Lasīt vairāk...";
+// Lasīt vairāk... pogas loģika ar klasi
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".readMoreText").forEach((button) => {
+    button.addEventListener("click", () => {
+      const moreText = button.closest(".card").querySelector(".more");
+      if (moreText) {
+        moreText.style.display =
+          moreText.style.display === "none" ? "block" : "none";
+        button.textContent =
+          moreText.style.display === "none" ? "Read more..." : "Read less";
       }
     });
-  }
+  });
 });
 
 // Modālā loga atvēršana pēc lapas ielādes
